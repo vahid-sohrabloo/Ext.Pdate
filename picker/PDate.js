@@ -44,11 +44,11 @@ Ext.define('Ext.picker.PDate', {
     extend: 'Ext.picker.Date',
     alias: 'widget.pdatepicker',
     alternateClassName: 'Ext.PDatePicker',
-renderTpl: [
-        '<div class="{cls}" id="{id}" role="grid" title="{ariaTitle} {value:this.longDay}">',
+	renderTpl: [
+        '<div id="{id}-innerEl" role="grid">',
             '<div role="presentation" class="{baseCls}-header">',
                 '<div class="{baseCls}-prev"><a id="{id}-prevEl" href="#" role="button" title="{prevText}"></a></div>',
-                '<div class="{baseCls}-month" id="{id}-middleBtnEl"></div>',
+                '<div class="{baseCls}-month" id="{id}-middleBtnEl">{%this.renderMonthBtn(values, out)%}</div>',
                 '<div class="{baseCls}-next"><a id="{id}-nextEl" href="#" role="button" title="{nextText}"></a></div>',
             '</div>',
             '<table id="{id}-eventEl" class="{baseCls}-inner" cellspacing="0" role="presentation">',
@@ -69,12 +69,12 @@ renderTpl: [
                 '</tr></tbody>',
             '</table>',
             '<tpl if="showToday">',
-                '<div id="{id}-footerEl" role="presentation" class="{baseCls}-footer"></div>',
+                '<div id="{id}-footerEl" role="presentation" class="{baseCls}-footer">{%this.renderTodayBtn(values, out)%}</div>',
             '</tpl>',
         '</div>',
         {
             firstInitial: function(value) {
-                return value.substr(0,1);
+                return Ext.picker.PDate.prototype.getDayInitial(value);
             },
             isEndOfWeek: function(value) {
                 // convert from 1 based index to 0 based
@@ -83,8 +83,11 @@ renderTpl: [
                 var end = value % 7 === 0 && value !== 0;
                 return end ? '</tr><tr role="row">' : '';
             },
-            longDay: function(value){
-                return Ext.PDate.format(value, this.longDayFormat);
+            renderTodayBtn: function(values, out) {
+                Ext.DomHelper.generateMarkup(values.$comp.todayBtn.getRenderTree(), out);
+            },
+            renderMonthBtn: function(values, out) {
+                Ext.DomHelper.generateMarkup(values.$comp.monthBtn.getRenderTree(), out);
             }
         }
     ],
@@ -93,7 +96,9 @@ renderTpl: [
      * @cfg {Number} startDay
      * Day index at which the week should begin, 0-based (defaults to 6, which is Sunday)
      */
-    startDay : 6,
+    //<locale>
+    startDay : 0,
+    //</locale>
     
 
 
@@ -105,23 +110,23 @@ renderTpl: [
 
         Ext.picker.Date.superclass.initEvents.call(this);
 
-        me.prevRepeater = Ext.create('Ext.util.ClickRepeater', me.prevEl, {
+        me.prevRepeater = new Ext.util.ClickRepeater(me.prevEl, {
             handler: me.showPrevMonth,
             scope: me,
             preventDefault: true,
             stopDefault: true
         });
 
-        me.nextRepeater = Ext.create('Ext.util.ClickRepeater', me.nextEl, {
+        me.nextRepeater = new Ext.util.ClickRepeater(me.nextEl, {
             handler: me.showNextMonth,
             scope: me,
             preventDefault:true,
             stopDefault:true
         });
 
-        me.keyNav = Ext.create('Ext.util.KeyNav', me.eventEl, Ext.apply({
+        me.keyNav = new Ext.util.KeyNav(me.eventEl, Ext.apply({
             scope: me,
-            'left' : function(e){
+            left : function(e){
                 if(e.ctrlKey){
                     me.showPrevMonth();
                 }else{
@@ -129,7 +134,7 @@ renderTpl: [
                 }
             },
 
-            'right' : function(e){
+            right : function(e){
                 if(e.ctrlKey){
                     me.showNextMonth();
                 }else{
@@ -137,7 +142,7 @@ renderTpl: [
                 }
             },
 
-            'up' : function(e){
+            up : function(e){
                 if(e.ctrlKey){
                     me.showNextYear();
                 }else{
@@ -145,28 +150,24 @@ renderTpl: [
                 }
             },
 
-            'down' : function(e){
+            down : function(e){
                 if(e.ctrlKey){
                     me.showPrevYear();
                 }else{
                     me.update(eDate.add(me.activeDate, day, 7));
                 }
             },
-            'pageUp' : me.showNextMonth,
-            'pageDown' : me.showPrevMonth,
-            'enter' : function(e){
+            pageUp : me.showNextMonth,
+            pageDown : me.showPrevMonth,
+            enter : function(e){
                 e.stopPropagation();
                 return true;
             }
         }, me.keyNavConfig));
 
-        if(me.showToday){
+        if (me.showToday) {
             me.todayKeyListener = me.eventEl.addKeyListener(Ext.EventObject.SPACE, me.selectToday,  me);
         }
-        me.mon(me.eventEl, 'mousewheel', me.handleMouseWheel, me);
-        me.mon(me.eventEl, 'click', me.handleDateClick,  me, {delegate: 'a.' + me.baseCls + '-date'});
-        me.mon(me.monthBtn, 'click', me.showMonthPicker, me);
-        me.mon(me.monthBtn, 'arrowclick', me.showMonthPicker, me);
         me.update(me.value);
     },
 
@@ -178,17 +179,23 @@ renderTpl: [
         var me = this,
             dd = me.disabledDates,
             re = '(?:',
-            len;
+            len,
+            d, dLen, dI;
 
         if(!me.disabledDatesRE && dd){
                 len = dd.length - 1;
 
-            Ext.each(dd, function(d, i){
-                re += Ext.isDate(d) ? '^' + Ext.String.escapeRegex(Ext.PDate.dateFormat(d, me.format)) + '$' : dd[i];
-                if(i != len){
+            dLen = dd.length;
+
+            for (d = 0; d < dLen; d++) {
+                dI = dd[d];
+
+                re += Ext.isDate(dI) ? '^' + Ext.String.escapeRegex(Ext.PDate.dateFormat(dI, me.format)) + '$' : dI;
+                if (d != len) {
                     re += '|';
                 }
-            }, me);
+            }
+
             me.disabledDatesRE = new RegExp(re + ')');
         }
     },
@@ -203,7 +210,7 @@ renderTpl: [
             picker = me.monthPicker;
 
         if (!picker) {
-            me.monthPicker = picker = Ext.create('Ext.picker.PMonth', {
+            me.monthPicker = picker = new Ext.picker.PMonth({
                 renderTo: me.el,
                 floating: true,
                 shadow: false,
@@ -235,8 +242,6 @@ renderTpl: [
             year = value[1],
             gd=Ext.PDate.PersianToGregorian(year,month,Ext.PDate.getDate(me.getActive())),
             date = new Date(gd[0], gd[1], gd[2]);
-            console.log(gd);
-            console.log(value);
 		/*
         if (date.getMonth() !== month) {
             // 'fix' the JS rolling date conversion if needed
@@ -296,6 +301,7 @@ renderTpl: [
             } else {
                 me.fullUpdate(date, active);
             }
+            me.innerEl.dom.title = Ext.String.format(me.ariaTitle, Ext.PDate.format(me.activeDate, me.ariaTitleDateFormat));
         }
         return me;
     },
@@ -304,9 +310,8 @@ renderTpl: [
      * Update the contents of the picker for a new month
      * @private
      * @param {Date} date The new date
-     * @param {Date} active The active date
      */
-    fullUpdate: function(date, active){
+    fullUpdate: function(date){
     	
         var me = this,
             cells = me.cells.elements,
@@ -352,7 +357,6 @@ renderTpl: [
         current=eDate.clearTime(current);
         eDate.setDate(current,prevStart);
         current.setHours(me.initHour);
-        console.log(Ext.PDate.format(current,"Y-m-d"));
 
         if (me.showToday) {
             tempDate = eDate.clearTime(new Date());
@@ -377,7 +381,7 @@ renderTpl: [
             }
             if(value == sel){
                 cell.className += ' ' + me.selectedCls;
-                me.el.dom.setAttribute('aria-activedescendant', cell.id);
+                me.fireEvent('highlightitem', me, cell);
                 if (visible && me.floating) {
                     Ext.fly(cell.firstChild).focus(50);
                 }
@@ -425,20 +429,19 @@ renderTpl: [
             setCellClass(cells[i]);
         }
 
-        me.monthBtn.setText(me.monthNames[eDate.getMonth(date)] + ' ' + eDate.getFullYear(date));
-    },
+        me.monthBtn.setText(Ext.PDate.format(date, me.monthYearFormat));
+    }
 
 },
 
 // After dependencies have loaded:
 function() {
-    var proto = this.prototype;
+	var proto = this.prototype,
+        date = Ext.PDate;
 
-    proto.monthNames = Ext.PDate.monthNames;
-
-    proto.dayNames = Ext.PDate.dayNames;
-
-    proto.format = Ext.PDate.defaultFormat;
+    proto.monthNames = date.monthNames;
+    proto.dayNames   = date.dayNames;
+    proto.format     = date.defaultFormat;
 });
 
 
@@ -564,23 +567,13 @@ If you are unsure which license is appropriate for your use, please contact the 
 
     /**
      * @cfg {Number} maxHeight
-     * @hide
+     * @private
      */
 
     /**
      * The {@link Ext.picker.Date} instance for this DateMenu
      * @property picker
      * @type Ext.picker.Date
-     */
-
-    /**
-     * @event click
-     * @hide
-     */
-
-    /**
-     * @event itemclick
-     * @hide
      */
 
     initComponent : function(){
@@ -603,9 +596,7 @@ If you are unsure which license is appropriate for your use, please contact the 
         me.picker = me.down('pdatepicker');
         /**
          * @event select
-         * Fires when a date is selected from the {@link #picker Ext.picker.Date}
-         * @param {Ext.picker.Date} picker The {@link #picker Ext.picker.Date}
-         * @param {Date} date The selected date
+         * @inheritdoc Ext.picker.Date#select
          */
         me.relayEvents(me.picker, ['select']);
 

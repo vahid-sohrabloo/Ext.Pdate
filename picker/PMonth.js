@@ -31,27 +31,34 @@ Ext.define('Ext.picker.PMonth', {
 		me.activeYear = me.getYear(Ext.PDate.getFullYear(new Date()) - 4, -4);
 	},
 	// private, inherit docs
-	onRender: function(ct, position) {
+	beforeRender: function(ct, position) {
 
 		var me = this,
-		i = 0,
-		months = [],
-		shortName = Ext.PDate.getShortMonthName,
-		monthLen = me.monthOffset;
+            i = 0,
+            months = [],
+            shortName = Ext.PDate.getShortMonthName,
+            monthLen = me.monthOffset,
+            margin = me.monthMargin,
+            style = '';
 
-		for (; i < monthLen; ++i) {
-			months.push(shortName(i), shortName(i + monthLen));
-		}
+        me.callParent();
 
-		Ext.apply(me.renderData, {
-			months: months,
-			years: me.getYears(),
-			showButtons: me.showButtons
-		});
+        for (; i < monthLen; ++i) {
+            months.push(shortName(i), shortName(i + monthLen));
+        }
+        
+        if (Ext.isDefined(margin)) {
+            style = 'margin: 0 ' + margin + 'px;';
+        }
 
-		me.addChildEls('bodyEl', 'prevEl', 'nextEl', 'buttonsEl');
+        Ext.apply(me.renderData, {
+            months: months,
+            years: me.getYears(),
+            showButtons: me.showButtons,
+            monthStyle: style
+        });
 
-		Ext.picker.Month.superclass.onRender.apply(this, arguments);
+		Ext.picker.Month.superclass.beforeRender.apply(this, arguments);
 	},
 	/**
 	 * Set the value for the picker.

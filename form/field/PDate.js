@@ -90,7 +90,9 @@ Ext.define('Ext.form.field.PDate', {
     requires: ['Ext.picker.PDate'],
     alternateClassName: ['Ext.form.PDateField', 'Ext.form.PDate'],
 
+    //<locale>
     format : "Y/m/d",
+    //</locale>
     startDay: 6,
     
     /**
@@ -127,14 +129,17 @@ dateField.setValue('2006-05-04');
         var me = this,
             utilDate = Ext.PDate,
             parsedDate,
-            result = null;
+            result = null,
+            strict = me.useStrict,
+            parsedDate;
+
             
         if (utilDate.formatContainsHourInfo(format)) {
             // if parse format contains hour information, no DST adjustment is necessary
-            result = utilDate.parse(value, format);
+            result = utilDate.parse(value, format, strict);
         } else {
             // set time to 12 noon, then clear the time
-            parsedDate = utilDate.parse(value + ' ' + me.initTime, format + ' ' + me.initTimeFormat);
+            parsedDate = utilDate.parse(value + ' ' + me.initTime, format + ' ' + me.initTimeFormat, strict);
             if (parsedDate) {
                 result = utilDate.clearTime(parsedDate);
             }
@@ -162,7 +167,7 @@ dateField.setValue('2006-05-04');
         var me = this,
             format = Ext.String.format;
 
-        return Ext.create('Ext.picker.PDate', {
+        return new Ext.picker.PDate({
         	pickerField: me,
             ownerCt: me.ownerCt,
             renderTo: document.body,

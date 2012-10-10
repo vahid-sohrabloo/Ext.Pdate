@@ -352,7 +352,7 @@ If you are unsure which license is appropriate for your use, please contact the 
 		},
 		/**
 		 * Returns the current timestamp
-		 * @return {Date} The current timestamp
+		 * @return {Number} The current timestamp
 		 * @method
 		 */
 		now: Ext.Date.now,
@@ -434,8 +434,8 @@ If you are unsure which license is appropriate for your use, please contact the 
 			"MS": function(input, strict) {
 				// note: the timezone offset is ignored since the MS Ajax server sends
 				// a UTC milliseconds-since-Unix-epoch value (negative values are allowed)
-				var re = new RegExp('\\/Date\\(([-+])?(\\d+)(?:[+-]\\d{4})?\\)\\/');
-				var r = (input || '').match(re);
+				var re = new RegExp('\\/Date\\(([-+])?(\\d+)(?:[+-]\\d{4})?\\)\\/'),
+				    r = (input || '').match(re);
 				return r? new Date(((r[1] || '') + r[2]) * 1) : null;
 			}
 		},
@@ -562,15 +562,16 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 * @static
 		 */
 		dayNames:Ext.Date.dayNames,
-
+		
+		//<locale type="array">
 		/**
 		 * An array of textual month names.
 		 * Override these values for international dates.
 		 * Example:
 		 * <pre><code>
 		 Ext.PDate.monthNames = [
-		 'JanInYourLang',
-		 'FebInYourLang',
+		 'FarvardinInYourLang',
+		 'OrdibeheshtInYourLang',
 		 ...
 		 ];
 		 </code></pre>
@@ -583,7 +584,7 @@ If you are unsure which license is appropriate for your use, please contact the 
 		"Khordad",
 		"Tir",
 		"Mordad",
-		"Shahriva",
+		"Shahrivar",
 		"Mehr",
 		"Aban",
 		"Azar",
@@ -591,15 +592,17 @@ If you are unsure which license is appropriate for your use, please contact the 
 		"Bahman",
 		"Esfand"
 		],
-
+		
+		//</locale>
+		//<locale type="array">
 		/**
 		 * An object hash of zero-based javascript month numbers (with short month names as keys. note: keys are case-sensitive).
 		 * Override these values for international dates.
 		 * Example:
 		 * <pre><code>
 		 Ext.PDate.monthNumbers = {
-		 'ShortJanNameInYourLang':0,
-		 'ShortFebNameInYourLang':1,
+		 'ShortFarNameInYourLang':0,
+		 'ShortOrdNameInYourLang':1,
 		 ...
 		 };
 		 </code></pre>
@@ -608,18 +611,31 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 */
 		monthNumbers : {
 			Far:0,
+			Farvardin:0,
 			Ord:1,
+			Ordibehesht:1,
 			Kho:2,
+			Khordad:2,
 			Tir:3,
 			Mor:4,
+			Mordad:4,
 			Sha:5,
+			Shahrivar:5,
 			Meh:6,
+			Mehr:6,
 			Aba:7,
+			Aban:7,
 			Aza:8,
+			Azar:8,
 			Dey:9,
 			Bah:10,
-			Esf:11
+			Bahman:10,
+			Esf:11,
+			Esfand:11
 		},
+		//</locale>
+		
+		//<locale>
 		/**
 		 * <p>The date format string that the {@link Ext.util.Format#dateRenderer}
 		 * and {@link Ext.util.Format#date} functions use.  See {@link Ext.PDate} for details.</p>
@@ -629,6 +645,8 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 * @type String
 		 */
 		defaultFormat : "Y/m/d",
+		//</locale>
+		
 		/**
 		 * Get the short month name for the given month number.
 		 * Override this function for international dates.
@@ -637,8 +655,11 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 * @static
 		 */
 		getShortMonthName : function(month) {
-			return utilPDate.monthNames[month].substring(0, 3);
+			return Ext.PDate.monthNames[month].substring(0, 3);
 		},
+		 //</locale>
+		 
+		 //<locale type="function">
 		/**
 		 * Get the short day name for the given day number.
 		 * Override this function for international dates.
@@ -646,9 +667,15 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 * @return {String} The short day name.
 		 * @static
 		 */
+		//</locale>
+		
+		//<locale type="function">
 		getShortDayName : function(day) {
-			return utilPDate.dayNames[day].substring(0, 3);
+			return Ext.PDate.dayNames[day].substring(0, 3);
 		},
+		//</locale>
+		
+		//<locale type="function">
 		/**
 		 * Get the zero-based javascript month number for the given short/full month name.
 		 * Override this function for international dates.
@@ -656,10 +683,15 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 * @return {Number} The zero-based javascript month number.
 		 * @static
 		 */
+		//</locale>
+		
+		//<locale type="function">
 		getMonthNumber : function(name) {
 			// handle camel casing for english month names (since the keys for the Ext.PDate.monthNumbers hash are case sensitive)
-			return utilPDate.monthNumbers[name.substring(0, 1).toUpperCase() + name.substring(1, 3).toLowerCase()];
+			return Ext.PDate.monthNumbers[name.substring(0, 1).toUpperCase() + name.substring(1, 3).toLowerCase()];
 		},
+		//</locale>
+		
 		/**
 		 * Checks if the specified format contains hour information
 		 * @param {String} format The format to check
@@ -673,7 +705,7 @@ If you are unsure which license is appropriate for your use, please contact the 
 			return function(format) {
 				return hourInfoRe.test(format.replace(stripEscapeRe, ''));
 			};
-		})(),
+		}()),
 		/**
 		 * Checks if the specified format contains information about
 		 * anything other than the time.
@@ -690,7 +722,24 @@ If you are unsure which license is appropriate for your use, please contact the 
 			return function(format) {
 				return dateInfoRe.test(format.replace(stripEscapeRe, ''));
 			};
-		})(),
+		}()),
+    
+	    /**
+	     * Removes all escaping for a date format string. In date formats,
+	     * using a '\' can be used to escape special characters.
+	     * @param {String} format The format to unescape
+	     * @return {String} The unescaped format
+	     * @method
+	     */
+	    unescapeFormat: (function() { 
+	        var slashRe = /\\/gi;
+	        return function(format) {
+	            // Escape the format, since \ can be used to escape special
+	            // characters in a date format. For example, in a spanish
+	            // locale the format may be: 'd \\de F \\de Y'
+	            return format.replace(slashRe, '');
+	        }
+	    }()),
 		/**
 		 * The base format-code to formatting-function hashmap used by the {@link #format} method.
 		 * Formatting functions are strings (or functions which return strings) which
@@ -740,8 +789,9 @@ If you are unsure which license is appropriate for your use, please contact the 
 			Z: "(this.getTimezoneOffset() * -60)",
 
 			c: function() { // ISO-8601 -- GMT format
-				for (var c = "Y-m-dTH:i:sP", code = [], i = 0, l = c.length; i < l; ++i) {
-					var e = c.charAt(i);
+				var c, code, i, l, e;
+				for (c = "Y-m-dTH:i:sP", code = [], i = 0, l = c.length; i < l; ++i) {
+					e = c.charAt(i);
 					code.push(e == "T" ? "'T'" : utilPDate.getFormatCode(e)); // treat T as a character literal
 				}
 				return code.join(" + ");
@@ -836,9 +886,10 @@ If you are unsure which license is appropriate for your use, please contact the 
 		createFormat : function(format) {
 			var code = [],
 			special = false,
-			ch = '';
+			ch = '',
+			i;
 
-			for (var i = 0; i < format.length; ++i) {
+			for (i = 0; i < format.length; ++i) {
 				ch = format.charAt(i);
 				if (!special && ch == "\\") {
 					special = true;
@@ -921,9 +972,13 @@ If you are unsure which license is appropriate for your use, please contact the 
 				calc = [],
 				regex = [],
 				special = false,
-				ch = "";
+				ch = "",
+                i = 0,
+                len = format.length,
+                atEnd = [],
+                obj;
 
-				for (var i = 0; i < format.length; ++i) {
+				 for (; i < len; ++i) {
 					ch = format.charAt(i);
 					if (!special && ch == "\\") {
 						special = true;
@@ -931,19 +986,26 @@ If you are unsure which license is appropriate for your use, please contact the 
 						special = false;
 						regex.push(Ext.String.escape(ch));
 					} else {
-						var obj = utilPDate.formatCodeToRegex(ch, currentGroup);
+						obj = utilPDate.formatCodeToRegex(ch, currentGroup);
 						currentGroup += obj.g;
 						regex.push(obj.s);
 						if (obj.g && obj.c) {
-							calc.push(obj.c);
+							if (obj.calcAtEnd) {
+	                            atEnd.push(obj.c);
+	                        } else {
+	                            calc.push(obj.c);
+	                        }
 						}
 					}
 				}
-
+				
+				 
+            	calc = calc.concat(atEnd);
+				
 				utilPDate.parseRegexes[regexNum] = new RegExp("^" + regex.join('') + "$", 'i');
 				utilPDate.parseFunctions[format] = Ext.functionFactory("input", "strict", xf(code, regexNum, calc.join('')));
 			};
-		})(),
+		}()),
 		// private
 		parseCodes : {
 			/*
@@ -955,12 +1017,12 @@ If you are unsure which license is appropriate for your use, please contact the 
 			d: {
 				g:1,
 				c:"d = parseInt(results[{0}], 10);\n",
-				s:"(\\d{2})" // day of month with leading zeroes (01 - 31)
+				s:"(3[0-1]|[1-2][0-9]|0[1-9])" // day of month with leading zeroes (01 - 31)
 			},
 			j: {
 				g:1,
 				c:"d = parseInt(results[{0}], 10);\n",
-				s:"(\\d{1,2})" // day of month without leading zeroes (1 - 31)
+				s:"(3[0-1]|[1-2][0-9]|[1-9])" // day of month without leading zeroes (1 - 31)
 			},
 			D: function() {
 				for (var a = [], i = 0; i < 7; a.push(utilPDate.getShortDayName(i)), ++i); // get localised short day names
@@ -982,11 +1044,13 @@ If you are unsure which license is appropriate for your use, please contact the 
 				c:null,
 				s:"[1-7]" // ISO-8601 day number (1 (monday) - 7 (sunday))
 			},
+			//<locale type="object" property="parseCodes">
 			S: {
 				g:0,
 				c:null,
 				s:"(?:st|nd|rd|th)"
 			},
+			//</locale>
 			w: {
 				g:0,
 				c:null,
@@ -1018,12 +1082,12 @@ If you are unsure which license is appropriate for your use, please contact the 
 			m: {
 				g:1,
 				c:"m = parseInt(results[{0}], 10) - 1;\n",
-				s:"(\\d{2})" // month number with leading zeros (01 - 12)
+				s:"(1[0-2]|0[1-9])" // month number with leading zeros (01 - 12)
 			},
 			n: {
 				g:1,
 				c:"m = parseInt(results[{0}], 10) - 1;\n",
-				s:"(\\d{1,2})" // month number without leading zeros (1 - 12)
+				s:"(1[0-2]|[1-9])" // month number without leading zeros (1 - 12)
 			},
 			t: {
 				g:0,
@@ -1054,40 +1118,50 @@ If you are unsure which license is appropriate for your use, please contact the 
 			 * even though it doesn't exactly match the spec. It gives much more flexibility
 			 * in being able to specify case insensitive regexes.
 			 */
+			//<locale type="object" property="parseCodes">
 			a: {
 				g:1,
 				c:"if (/(am)/i.test(results[{0}])) {\n"
 				+ "if (!h || h == 12) { h = 0; }\n"
 				+ "} else { if (!h || h < 12) { h = (h || 0) + 12; }}",
-				s:"(am|pm|AM|PM)"
+				s:"(am|pm|AM|PM)",
+				calcAtEnd: true
 			},
+			//</locale>
+        	//<locale type="object" property="parseCodes">
 			A: {
 				g:1,
 				c:"if (/(am)/i.test(results[{0}])) {\n"
 				+ "if (!h || h == 12) { h = 0; }\n"
 				+ "} else { if (!h || h < 12) { h = (h || 0) + 12; }}",
-				s:"(AM|PM|am|pm)"
+				s:"(AM|PM|am|pm)",
+				calcAtEnd: true
 			},
-			g: function() {
-				return utilPDate.formatCodeToRegex("G");
-			},
+			//</locale>
+			g: {
+	            g:1,
+	            c:"h = parseInt(results[{0}], 10);\n",
+	            s:"(1[0-2]|[0-9])" //  12-hr format of an hour without leading zeroes (1 - 12)
+	        },
 			G: {
-				g:1,
-				c:"h = parseInt(results[{0}], 10);\n",
-				s:"(\\d{1,2})" // 24-hr format of an hour without leading zeroes (0 - 23)
-			},
-			h: function() {
-				return utilPDate.formatCodeToRegex("H");
-			},
+	            g:1,
+	            c:"h = parseInt(results[{0}], 10);\n",
+	            s:"(2[0-3]|1[0-9]|[0-9])" // 24-hr format of an hour without leading zeroes (0 - 23)
+	        },
+			h: {
+	            g:1,
+	            c:"h = parseInt(results[{0}], 10);\n",
+	            s:"(1[0-2]|0[1-9])" //  12-hr format of an hour with leading zeroes (01 - 12)
+	        },
 			H: {
 				g:1,
 				c:"h = parseInt(results[{0}], 10);\n",
-				s:"(\\d{2})" //  24-hr format of an hour with leading zeroes (00 - 23)
+				s:"(2[0-3]|[0-1][0-9])" //  24-hr format of an hour with leading zeroes (00 - 23)
 			},
 			i: {
 				g:1,
 				c:"i = parseInt(results[{0}], 10);\n",
-				s:"(\\d{2})" // minutes with leading zeros (00 - 59)
+				s:"([0-5][0-9])" // minutes with leading zeros (00 - 59)
 			},
 			s: {
 				g:1,
@@ -1108,7 +1182,7 @@ If you are unsure which license is appropriate for your use, please contact the 
 				"mn = o.substring(3,5) % 60;", // get minutes
 				"o = ((-12 <= (hr*60 + mn)/60) && ((hr*60 + mn)/60 <= 14))? (sn + Ext.String.leftPad(hr, 2, '0') + Ext.String.leftPad(mn, 2, '0')) : null;\n" // -12hrs <= GMT offset <= 14hrs
 				].join("\n"),
-				s: "([+\-]\\d{4})" // GMT offset in hrs and mins
+				s: "([+-]\\d{4})" // GMT offset in hrs and mins
 			},
 			P: {
 				g:1,
@@ -1119,7 +1193,7 @@ If you are unsure which license is appropriate for your use, please contact the 
 				"mn = o.substring(4,6) % 60;", // get minutes
 				"o = ((-12 <= (hr*60 + mn)/60) && ((hr*60 + mn)/60 <= 14))? (sn + Ext.String.leftPad(hr, 2, '0') + Ext.String.leftPad(mn, 2, '0')) : null;\n" // -12hrs <= GMT offset <= 14hrs
 				].join("\n"),
-				s: "([+\-]\\d{2}:\\d{2})" // GMT offset in hrs and mins (with colon separator)
+				s: "([+-]\\d{2}:\\d{2})" // GMT offset in hrs and mins (with colon separator)
 			},
 			T: {
 				g:0,
@@ -1138,7 +1212,7 @@ If you are unsure which license is appropriate for your use, please contact the 
 				utilPDate.formatCodeToRegex("Y", 1), // year
 				utilPDate.formatCodeToRegex("m", 2), // month
 				utilPDate.formatCodeToRegex("d", 3), // day
-				utilPDate.formatCodeToRegex("h", 4), // hour
+				utilPDate.formatCodeToRegex("H", 4), // hour
 				utilPDate.formatCodeToRegex("i", 5), // minute
 				utilPDate.formatCodeToRegex("s", 6), // second
 				{
@@ -1157,9 +1231,11 @@ If you are unsure which license is appropriate for your use, please contact the 
 					"}"
 					].join('\n')
 				}
-				];
+				],
+                i,
+                l;
 
-				for (var i = 0, l = arr.length; i < l; ++i) {
+				for (i = 0, l = arr.length; i < l; ++i) {
 					calc.push(arr[i].c);
 				}
 
@@ -1194,19 +1270,34 @@ If you are unsure which license is appropriate for your use, please contact the 
 		dateFormat: function(date, format) {
 			return utilPDate.format(date, format);
 		},
+		
+		/**
+	     * Compares if two dates are equal by comparing their values.
+	     * @param {Date} date1
+	     * @param {Date} date2
+	     * @return {Boolean} True if the date values are equal
+	     */
+	    isEqual: Ext.Date.isEqual,
+    
 		/**
 		 * Formats a date given the supplied format string.
 		 * @param {Date} date The date to format
 		 * @param {String} format The format string
-		 * @return {String} The formatted date
+		 * @return {String} The formatted date or an empty string if date parameter is not a JavaScript Date object
 		 */
 		format: function(date, format) {
-			if (utilPDate.formatFunctions[format] == null) {
-				utilPDate.createFormat(format);
-			}
-			var result = utilPDate.formatFunctions[format].call(date);
-			return result + '';
-		},
+	        var formatFunctions = utilPDate.formatFunctions;
+	
+	        if (!Ext.isDate(date)) {
+	            return '';
+	        }
+	
+	        if (formatFunctions[format] == null) {
+	            utilPDate.createFormat(format);
+	        }
+	
+	        return formatFunctions[format].call(date) + '';
+	    },
 		/**
 		 * Get the timezone abbreviation of the current date (equivalent to the format specifier 'T').
 		 *
@@ -1334,7 +1425,9 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 * @param {Date} date The date
 		 * @return {String} 'st, 'nd', 'rd' or 'th'.
 		 */
+		//<locale type="function">
 		getSuffix : Ext.Date.getSuffix,
+		//</locale>
 
 		/**
 		 * Creates and returns a new Date instance with the exact same date value as the called instance.
@@ -1402,9 +1495,10 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 */
 		add : function(date, interval, value) {
 			var d = Ext.PDate.clone(date),
-			Date = Ext.PDate;
-			if (!interval || value === 0)
-				return d;
+				day;
+			if (!interval || value === 0) {
+	            return d;
+	        }
 
 			switch(interval.toLowerCase()) {
 				case Ext.Date.MILLI:
@@ -1423,10 +1517,20 @@ If you are unsure which license is appropriate for your use, please contact the 
 					d.setDate(d.getDate() + value);
 					break;
 				case Ext.Date.MONTH:
-					Ext.PDate.setMonth(d,Ext.PDate.getMonth(date) + value);
+					day = Ext.PDate.getDate(d);
+	                if (day > 29) {
+	                    day = Math.min(day, Ext.PDate.getLastDateOfMonth(Ext.PDate.add(Ext.PDate.getFirstDateOfMonth(d), Ext.Date.MONTH, value)).getDate());
+	                }
+	                Ext.PDate.setDate(d,day);
+	                Ext.PDate.setMonth(d,Ext.PDate.getMonth(d) + value);
 					break;
 				case Ext.Date.YEAR:
-					Ext.PDate.setFullYear(d,Ext.PDate.getFullYear(date) + value);
+					day = Ext.Pdate.getDate(d);
+	                if (day > 29) {
+	                    day = Math.min(day, Ext.PDate.getLastDateOfMonth(Ext.PDate.add(Ext.PDate.getFirstDateOfMonth(d), Ext.Date.YEAR, value)).getDate());
+	                }
+	                Ext.PDate.setDate(d,day);
+					Ext.PDate.setFullYear(d,Ext.PDate.getFullYear(d) + value);
 					break;
 			}
 			return d;
@@ -1438,9 +1542,9 @@ If you are unsure which license is appropriate for your use, please contact the 
 		 * @param {Date} end End date
 		 * @return {Boolean} true if this date falls on or between the given start and end dates.
 		 */
-		between : Ext.Date.between,
+		between : Ext.Date.between
 	};
 
 	var utilPDate = Ext.PDate;
 
-})();
+}());
