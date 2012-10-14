@@ -44,6 +44,7 @@ Ext.define('Ext.picker.PDate', {
     extend: 'Ext.picker.Date',
     alias: 'widget.pdatepicker',
     alternateClassName: 'Ext.PDatePicker',
+    requires: ['Ext.picker.PMonth'],
 	renderTpl: [
         '<div id="{id}-innerEl" role="grid">',
             '<div role="presentation" class="{baseCls}-header">',
